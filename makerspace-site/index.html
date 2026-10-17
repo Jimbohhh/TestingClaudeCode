@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Layer by Layer</title>
+  <meta name="description" content="3D printing builds with free step-by-step plans, hands-on lessons, and low-cost print files.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-head">
+    <div class="wrap head-row">
+      <a href="#/" class="logo" data-site-name>Layer by Layer</a>
+      <nav aria-label="Main">
+        <a href="#/builds">Builds</a>
+        <a href="#/learn">Learn</a>
+        <a href="#/faq">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <!-- HOME -->
+    <section data-view="home">
+      <div class="hero">
+        <div>
+          <p class="kicker">Print it · build it · learn how it works</p>
+          <h1>Things you can make, <span class="hl">layer by layer.</span></h1>
+          <p class="lead" data-site-tagline></p>
+          <div class="hero-cta">
+            <a class="btn" href="#/builds">Browse the builds</a>
+            <a class="btn ghost" href="#/learn">Start the printing lab</a>
+          </div>
+          <ul class="pill-row">
+            <li>Free plans for every build</li>
+            <li>Print files from a few dollars</li>
+            <li>Hands-on lessons</li>
+          </ul>
+        </div>
+        <div class="hero-viewer" id="heroViewer"></div>
+      </div>
+
+      <div class="how">
+        <div class="how-card"><span class="num">1</span><h3>Pick a build</h3><p>Spin it in 3D, check the difficulty, and see what you'll learn.</p></div>
+        <div class="how-card"><span class="num">2</span><h3>Read the free plans</h3><p>Parts list, printer settings, and step-by-step help. Print them or save as a PDF.</p></div>
+        <div class="how-card"><span class="num">3</span><h3>Get the files</h3><p>Buy the print-ready STL files for a few dollars and print them at home.</p></div>
+      </div>
+
+      <h2 class="section-title">Featured builds</h2>
+      <div class="grid" id="featured"></div>
+    </section>
+
+    <!-- CATALOG -->
+    <section data-view="builds" hidden>
+      <h1>All builds</h1>
+      <div class="filters" role="search">
+        <label class="search"><span class="sr">Search builds</span><input type="search" id="q" placeholder="Search builds or skills"></label>
+        <div class="chips" id="levelChips" aria-label="Difficulty"></div>
+        <div class="chips" id="catChips" aria-label="Category"></div>
+      </div>
+      <p class="muted" id="count" aria-live="polite"></p>
+      <div class="grid" id="catalog"></div>
+      <div class="bundle" id="bundle" hidden></div>
+    </section>
+
+    <!-- DETAIL -->
+    <section data-view="build" hidden>
+      <a href="#/builds" class="back-link">← All builds</a>
+      <div class="detail">
+        <div class="detail-viewer">
+          <div class="viewer" id="viewer"></div>
+          <div class="viewer-tools">
+            <label class="slice"><span>Print progress</span><input type="range" id="slice" min="0" max="100" value="100"><output id="sliceOut">100%</output></label>
+            <div class="tool-btns">
+              <button type="button" class="btn small ghost" id="playBtn" aria-pressed="true">Pause motion</button>
+              <button type="button" class="btn small ghost" id="explodeBtn" aria-pressed="false">Explode parts</button>
+              <button type="button" class="btn small ghost" id="resetBtn">Reset view</button>
+            </div>
+            <p class="muted small">Drag to spin. Scroll or pinch to zoom. Slide <b>print progress</b> to watch it build up layer by layer.</p>
+          </div>
+        </div>
+        <div class="detail-info" id="detailInfo"></div>
+      </div>
+      <div class="plans" id="plans"></div>
+    </section>
+
+    <!-- LEARN -->
+    <section data-view="learn" hidden>
+      <h1>The printing lab</h1>
+      <p class="lead">Six quick, hands-on lessons. Move the sliders and see what changes. Each one ties back to a setting you'll find in the build plans.</p>
+
+      <div class="lessons">
+        <article class="lesson" data-lesson="layer">
+          <h2><span class="num">1</span> Layer height</h2>
+          <p>A printer draws one thin slice at a time. Thinner slices look smoother but take longer.</p>
+          <canvas class="lcanvas"></canvas>
+          <label class="ctl">Layer height <input type="range" min="0.08" max="0.32" step="0.02" value="0.2"></label>
+          <p class="readout" data-out></p>
+        </article>
+
+        <article class="lesson" data-lesson="infill">
+          <h2><span class="num">2</span> Infill</h2>
+          <p>Most prints are hollow inside with a pattern that holds them up. Here is one slice from above.</p>
+          <canvas class="lcanvas square"></canvas>
+          <div class="seg">
+            <button type="button" data-pattern="lines" aria-pressed="false">Lines</button>
+            <button type="button" data-pattern="grid" aria-pressed="true">Grid</button>
+            <button type="button" data-pattern="triangles" aria-pressed="false">Triangles</button>
+            <button type="button" data-pattern="honeycomb" aria-pressed="false">Honeycomb</button>
+            <button type="button" data-pattern="gyroid" aria-pressed="false">Gyroid</button>
+          </div>
+          <label class="ctl">Density <input type="range" min="0" max="80" step="5" value="20"></label>
+          <p class="readout" data-out></p>
+        </article>
+
+        <article class="lesson" data-lesson="overhang">
+          <h2><span class="num">3</span> Overhangs and supports</h2>
+          <p>Each layer needs something under it. Lean the wall and see when it starts printing on air.</p>
+          <canvas class="lcanvas"></canvas>
+          <label class="ctl">Lean angle <input type="range" min="0" max="80" step="1" value="30"></label>
+          <label class="check"><input type="checkbox"> Add supports</label>
+          <p class="readout" data-out></p>
+        </article>
+
+        <article class="lesson" data-lesson="material">
+          <h2><span class="num">4</span> Pick a plastic</h2>
+          <p>Each filament is good at different things. Tap one to compare.</p>
+          <div class="seg">
+            <button type="button" data-mat="PLA" aria-pressed="true">PLA</button>
+            <button type="button" data-mat="PETG" aria-pressed="false">PETG</button>
+            <button type="button" data-mat="TPU" aria-pressed="false">TPU</button>
+            <button type="button" data-mat="ABS" aria-pressed="false">ABS</button>
+            <button type="button" data-mat="ASA" aria-pressed="false">ASA</button>
+          </div>
+          <div class="mat-panel" data-out></div>
+        </article>
+
+        <article class="lesson" data-lesson="cost">
+          <h2><span class="num">5</span> What does a print cost?</h2>
+          <p>Plastic is sold by the kilogram, and printers use about as much power as a bright lamp.</p>
+          <div class="form-grid">
+            <label>Filament used (g)<input name="grams" type="number" min="0" value="85"></label>
+            <label>Spool price ($/kg)<input name="spool" type="number" min="0" step="0.5" value="20"></label>
+            <label>Print time (hours)<input name="hours" type="number" min="0" step="0.5" value="6.5"></label>
+            <label>Printer power (W)<input name="watts" type="number" min="0" value="120"></label>
+            <label>Electricity ($/kWh)<input name="kwh" type="number" min="0" step="0.01" value="0.16"></label>
+          </div>
+          <p class="readout" data-out></p>
+        </article>
+
+        <article class="lesson wide" data-lesson="quiz">
+          <h2><span class="num">6</span> Check what you know</h2>
+          <div data-quiz></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section data-view="faq" hidden>
+      <h1>Questions</h1>
+      <div class="faq">
+        <details open><summary>What's free and what costs money?</summary><p>Every build's plans are free: the parts list, printer settings and step-by-step instructions. You can print them or save them as a PDF. The ready-to-print STL files are a small one-time purchase.</p></details>
+        <details><summary>How do I get my files after I pay?</summary><p>Checkout is handled by Stripe. Right after you pay, the confirmation page shows your download link, and Stripe emails you a receipt.</p></details>
+        <details><summary>What printer do I need?</summary><p>Any FDM printer with a bed of at least 180 × 180 mm works for every build here. Settings in the plans assume a 0.4 mm nozzle.</p></details>
+        <details><summary>Can I sell what I print?</summary><p>Files are for personal and classroom use. If you'd like to sell prints, get in touch about a maker license.</p></details>
+        <details><summary>Something didn't print right.</summary><p>Check the tips in the plans and the printing lab first. Still stuck? Email us and we'll help: <a data-contact></a></p></details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap foot-row">
+      <span>© <span id="year"></span> <span data-site-name>Layer by Layer</span></span>
+      <span>Questions? <a data-contact></a></span>
+      <span class="muted">Payments by Stripe</span>
+    </div>
+  </footer>
+
+  <dialog id="notReady">
+    <h2>Checkout isn't connected yet</h2>
+    <p>This build doesn't have a Stripe Payment Link yet. Shop owner: add one in <code>js/builds.js</code> (see the README).</p>
+    <form method="dialog"><button class="btn">OK</button></form>
+  </dialog>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+  <script src="js/builds.js"></script>
+  <script src="js/viewer.js"></script>
+  <script src="js/learn.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

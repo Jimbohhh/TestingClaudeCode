@@ -95,3 +95,6 @@ iOSInjectionProject/
 # Secrets
 secrets.plist
 GoogleService-Info.plist
+
+# Paid print files for the makerspace site: never commit these
+makerspace-site/private-files/
