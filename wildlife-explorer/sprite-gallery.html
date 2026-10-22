@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>WildDex Sprite Gallery</title><style>body{margin:0;background:#9db08a;font-family:sans-serif}canvas{display:block}</style></head>
+<body><canvas id="c" width="1600" height="1500"></canvas>
+<script src="js/util.js"></script><script src="js/data/animals.js"></script><script src="js/art/sprites.js"></script>
+<script>
+const ctx=document.getElementById('c').getContext('2d');
+const S=WE.Sprites; const list=[...WE.ANIMALS.map(a=>a.art), ...Object.values(WE.EXTRAS).filter(e=>e.art).map(e=>e.art)];
+let x=20,y=20,rowH=0; const mode=location.hash.slice(1)||'idle';
+const errs=[];
+for(const a of list){ try{
+  const f=S.frame(a, a.kind==='bird'&&mode==='walk'?'fly':mode, 3, 1.5);
+  const w=f.w/1.5, h=f.h/1.5;
+  if(x+w>1580){x=20;y+=rowH+24;rowH=0;}
+  ctx.drawImage(f.canvas,x,y,w,h); ctx.fillStyle='#000';ctx.font='11px sans-serif';ctx.fillText(a.id,x,y+h+12);
+  x+=w+16; rowH=Math.max(rowH,h);
+ }catch(e){errs.push(a.id+': '+e.message+' '+e.stack.split('\n')[1]);}}
+document.title=errs.length?('ERR '+errs.join(' | ')):'ok';
+</script></body></html>
