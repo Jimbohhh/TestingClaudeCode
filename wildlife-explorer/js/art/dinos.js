@@ -1093,5 +1093,8 @@
     return { canvas: c, ox: res.ox, oy: res.oy, scale: res.scale, box: res.box };
   };
 
+  // Skeleton geometry, shared with the Fossil Finders dig game (it builds bones from it).
+  S._dino = { dinoBox, dinoSkeleton, torsoPts, tailPts, neckPts, headPts, bipedLegs, quadLegs };
+
   Object.assign(S.RENDERERS, { dino: S.renderDino, ptero: S.renderPterosaur, marine: S.renderMarine, ammonite: S.renderAmmonite, bug: S.renderBug, food: S.renderFood, fish: S.renderFish });
 })(window.WE);

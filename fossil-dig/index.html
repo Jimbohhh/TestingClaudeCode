@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fossil Finders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Rubik+Dirt&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Title -->
+  <section class="screen" id="screen-title" hidden>
+    <div class="title-card">
+      <div class="title-eyebrow">A paleontology dig game</div>
+      <h1 class="logo">Fossil <span>Finders</span></h1>
+      <p class="title-lede">Dig up dinosaurs and other prehistoric animals at 16 real fossil sites. Chip, scrape and brush away the rock, jacket the bones in plaster, rebuild the skeleton in the lab, and fill your own museum.</p>
+      <div class="title-actions" id="title-actions"></div>
+    </div>
+  </section>
+
+  <!-- Expedition map -->
+  <section class="screen paper" id="screen-map" hidden>
+    <header class="bar">
+      <button class="icon-btn" id="map-back" type="button" aria-label="Back to title"></button>
+      <div class="bar-title"><h2>Field expeditions</h2><div class="bar-sub" id="map-count"></div></div>
+      <button class="btn ghost" id="btn-museum-map" type="button">Museum</button>
+    </header>
+    <div class="scroll" id="map-body"></div>
+  </section>
+
+  <!-- Museum -->
+  <section class="screen museum" id="screen-museum" hidden>
+    <header class="bar">
+      <button class="icon-btn" id="museum-back" type="button" aria-label="Back"></button>
+      <div class="bar-title"><h2>Your museum</h2><div class="bar-sub" id="museum-count"></div></div>
+      <span></span>
+    </header>
+    <div class="scroll" id="museum-body"></div>
+  </section>
+
+  <!-- Dig HUD -->
+  <header class="hud" id="hud-dig" hidden>
+    <button class="icon-btn" id="dig-back" type="button" aria-label="Leave dig"></button>
+    <div class="hud-title"><div id="dig-title"></div><div class="hud-sub" id="dig-sub"></div></div>
+    <div class="stats">
+      <div class="stat"><span>Bones jacketed</span><b id="st-bones">0</b><i class="meter"><i id="st-bar"></i></i></div>
+      <div class="stat"><span>Condition</span><b id="st-cond">100%</b></div>
+      <div class="stat"><span>Finds</span><b id="st-finds">0</b></div>
+    </div>
+  </header>
+
+  <!-- Lab HUD -->
+  <header class="hud" id="hud-lab" hidden>
+    <button class="icon-btn" id="lab-back" type="button" aria-label="Leave lab"></button>
+    <div class="hud-title"><div id="lab-title"></div><div class="hud-sub" id="lab-tip"></div></div>
+    <div class="lab-actions" id="lab-actions"></div>
+  </header>
+
+  <main id="stage-wrap" hidden><canvas id="stage" width="960" height="600"></canvas><p class="rotate-hint">Turn your phone sideways for a bigger dig site.</p></main>
+
+  <footer class="toolbar" id="toolbar">
+    <div class="tools">
+      <button class="tool" data-tool="pick" type="button"><span class="tool-name">Rock pick</span><kbd>1</kbd></button>
+      <button class="tool" data-tool="trowel" type="button"><span class="tool-name">Trowel</span><kbd>2</kbd></button>
+      <button class="tool" data-tool="brush" type="button"><span class="tool-name">Brush</span><kbd>3</kbd></button>
+    </div>
+    <p class="tip" id="dig-tip"></p>
+    <div class="tool-actions">
+      <button class="btn ghost" id="btn-hint" type="button">Hint</button>
+      <button class="btn primary" id="btn-finish" type="button" disabled>Finish dig</button>
+    </div>
+  </footer>
+
+  <button class="icon-btn sound" id="btn-sound" type="button" aria-label="Sound"></button>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="loading" id="loading"><div class="spinner"></div><span>Preparing the dig site</span></div>
+</div>
+
+<script src="../wildlife-explorer/js/util.js"></script>
+<script src="../wildlife-explorer/js/data/animals.js"></script>
+<script src="../wildlife-explorer/js/data/habitats.js"></script>
+<script src="../wildlife-explorer/js/data/prehistoric.js"></script>
+<script src="../wildlife-explorer/js/art/sprites.js"></script>
+<script src="../wildlife-explorer/js/art/dinos.js"></script>
+<script src="../wildlife-explorer/js/art/worldmap.js"></script>
+<script src="js/skeletons.js"></script>
+<script src="js/digdata.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/dig.js"></script>
+<script src="js/lab.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
