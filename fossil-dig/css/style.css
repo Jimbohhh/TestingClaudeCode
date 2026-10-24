@@ -37,6 +37,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 #app {
   position: fixed; inset: 0;
   display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
   background:
     radial-gradient(ellipse at 50% 0%, rgba(240, 106, 44, 0.08), transparent 60%),
     linear-gradient(180deg, #261d15, var(--bg));
@@ -71,7 +72,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .ico { display: inline-grid; place-items: center; width: 22px; height: 22px; }
 .ico svg { width: 100%; height: 100%; }
 .icon-btn .ico { width: 22px; height: 22px; }
-.icon-btn.sound { position: fixed; right: 14px; bottom: 14px; z-index: 30; }
+.icon-btn.sound { position: fixed; right: calc(14px + env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 30; }
 body:has(#toolbar:not([hidden])) .icon-btn.sound { bottom: auto; top: 70px; }
 
 /* ---------- stage ---------- */
@@ -276,10 +277,11 @@ p.bad { color: #b0381e; font-weight: 700; }
   .hud-sub, .stat span { display: none; }
   .tip { display: none; }
   .toasts { top: 54px; }
-  #app:has(#toolbar:not([hidden])) { padding-left: 104px; }
+  #app:has(#toolbar:not([hidden])) { padding-left: calc(104px + env(safe-area-inset-left, 0px)); }
   .toolbar {
-    position: fixed; left: 0; top: 0; bottom: 0; width: 104px; z-index: 5;
-    flex-direction: column; justify-content: center; gap: 8px; padding: 8px;
+    position: fixed; left: 0; top: 0; bottom: 0; width: calc(104px + env(safe-area-inset-left, 0px)); z-index: 5;
+    flex-direction: column; justify-content: center; gap: 8px;
+    padding: 8px 8px 8px calc(8px + env(safe-area-inset-left, 0px));
     border-top: 0; border-right: 1px solid var(--line);
   }
   .tools { flex-direction: column; gap: 6px; flex: none; }
