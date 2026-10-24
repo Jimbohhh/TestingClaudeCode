@@ -81,6 +81,15 @@
     desert: { bed: ['bandpass', 700, 0.07], calls: null },
     arctic: { bed: ['bandpass', 450, 0.09], calls: null },
     forest: { bed: ['bandpass', 900, 0.04], calls: 'birds' },
+    // Prehistoric eras: no songbirds yet, but insects, distant rumbles and honks
+    hellcreek: { bed: ['bandpass', 2400, 0.04], calls: 'prehistoric', insects: true },
+    morrison: { bed: ['bandpass', 600, 0.05], calls: 'prehistoric', insects: true },
+    gobi: { bed: ['bandpass', 700, 0.07], calls: 'prehistoric' },
+    yixian: { bed: ['bandpass', 1200, 0.04], calls: 'prehistoric', insects: true },
+    kemkem: { bed: ['lowpass', 500, 0.08], calls: 'prehistoric', insects: true },
+    seaway: { bed: ['lowpass', 300, 0.12], calls: 'bubbles' },
+    solnhofen: { bed: ['bandpass', 800, 0.06], insects: true },
+    ischigualasto: { bed: ['bandpass', 450, 0.07], calls: 'prehistoric' },
   };
   A.ambience = function (habId) {
     if (!A.ctx) return;
@@ -110,6 +119,10 @@
       } else if (cfg.calls === 'jungle' && r < 0.6) {
         if (Math.random() < 0.5) tone(900 + Math.random() * 500, 0.3, 'sine', 0.035, 0, 500);
         else for (let i = 0; i < 4; i++) tone(1600 + i * 120, 0.06, 'triangle', 0.03, i * 0.07);
+      } else if (cfg.calls === 'prehistoric' && r < 0.4) {
+        // a far-off, low honk or rumble
+        if (Math.random() < 0.5) { tone(95 + Math.random() * 40, 0.9, 'sawtooth', 0.03, 0, 70); tone(140, 0.7, 'sine', 0.025, 0.1, 100); }
+        else { tone(220 + Math.random() * 80, 0.35, 'triangle', 0.03, 0, 160); tone(200, 0.4, 'triangle', 0.025, 0.4, 150); }
       } else if (cfg.calls === 'bubbles' && r < 0.8) {
         for (let i = 0; i < 3; i++) tone(300 + Math.random() * 500, 0.08, 'sine', 0.05, i * 0.1, 900 + Math.random() * 500);
       }

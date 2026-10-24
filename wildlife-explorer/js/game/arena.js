@@ -34,7 +34,16 @@
   const STYLE_FOR = {
     savanna: 'savanna', rainforest: 'rainforest', reef: 'reef', desert: 'desert', arctic: 'arctic', forest: 'forest',
   };
+  // Prehistoric behaviour stats live with the prehistoric data.
+  Object.assign(PREY, WE.PREY_EXTRA || {});
+  Object.assign(THREAT, WE.THREAT_EXTRA || {});
+  const SWIM_KINDS = ['fish', 'cetacean', 'marine', 'ammonite', 'turtle'];
+  const swims = art => SWIM_KINDS.includes(art.kind) || (art.kind === 'snake' && B.ARENA_STYLE[AR.styleId] && B.ARENA_STYLE[AR.styleId].water);
+
   AR.styleFor = function (a) {
+    if (a.arenaStyle) return a.arenaStyle;
+    const hab = WE.habitatById(a.habitat);
+    if (hab.arena) return hab.arena;
     if (a.id === 'harpseal') return 'arcticwater';
     if (a.id === 'baldeagle') return 'lake';
     return STYLE_FOR[a.habitat];
@@ -54,7 +63,9 @@
     if (zoomCache[key]) return zoomCache[key];
     const f = S.frame(c.art, 'idle', 0, 1);
     const target = c.food ? 48 : 34 + 52 * Math.pow(sizeStat, 0.7);
-    return (zoomCache[key] = U.clamp(target / f.h, 0.12, 2));
+    // Long, low animals (mosasaurs, sauropods, snakes) are sized by length too.
+    const ref = c.food ? f.h : Math.max(f.h, f.w * 0.42);
+    return (zoomCache[key] = U.clamp(target / ref, 0.12, 2));
   }
 
   // ------------------------------------------------------------------
@@ -575,7 +586,7 @@
       ctx.strokeStyle = 'rgba(127,214,255,0.9)'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(p.x, p.y - 14, 26 + 20 * p.size, 0, U.TAU); ctx.stroke();
     }
-    const fish = p.c.art.kind === 'fish';
+    const fish = swims(p.c.art);
     const mode = p.moving ? (p.fast && !fish ? 'run' : 'walk') : (fish ? 'walk' : 'idle');
     drawCreature(ctx, p.c.art, p.x, p.y, p.zoom, p.dir, mode, p.offset, 0, alpha);
     if (p.state === 'flee' && alpha > 0.5) {
@@ -599,7 +610,7 @@
   function drawThreat(ctx, t) {
     if (t.st.hazard) { drawDustDevil(ctx, t); return; }
     const fly = t.st.fly;
-    const fish = t.c.art.kind === 'fish' || t.c.art.kind === 'cetacean' || t.c.art.kind === 'snake' && AR.styleId === 'reef';
+    const fish = swims(t.c.art);
     let mode = fly ? 'fly' : t.moving ? (t.fast ? 'run' : 'walk') : 'idle';
     if (fish) mode = 'walk';
     if (eff('warn') || eff('reveal')) {

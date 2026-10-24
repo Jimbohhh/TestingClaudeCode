@@ -7,6 +7,8 @@
   const E = { entities: [], player: null, camX: 0, t: 0, hab: null, startleTip: false, scale: 1 };
 
   function naturalHeight(art) { return S.frame(art, 'idle', 0, 1).h; }
+  // On-screen heights for prehistoric background animals.
+  const AMBIENT_H = { thescelosaurus: 100, dryosaurus: 110, zalambdalestes: 22, eomaia: 18, dragonfly: 26, ammonite: 44, smallfish: 30 };
 
   function makeEntity(a, art, x, opts) {
     const nh = naturalHeight(art);
@@ -32,19 +34,23 @@
     E.decor = [];
     const r = U.rng('spawn-' + habId);
     const dex = WE.ANIMALS.filter(a => a.habitat === habId);
+    const gap = (WORLD_W - 1500) / Math.max(1, dex.length - 1);
     dex.forEach((a, i) => {
-      const x = 900 + i * 980 + r.range(-200, 200);
-      const ent = makeEntity(a, a.art, x, { zoom: a.worldScale, dex: true, layer: a.layer, minH: 52 });
+      const x = 850 + i * gap + r.range(-gap * 0.2, gap * 0.2);
+      // Prehistoric creatures give an on-screen height (1 m is about 85 px next to the explorer).
+      const zoom = a.heightPx ? a.heightPx / naturalHeight(a.art) : a.worldScale;
+      const ent = makeEntity(a, a.art, x, { zoom, dex: true, layer: a.layer, minH: 52 });
       placeEntity(ent, r);
       E.entities.push(ent);
     });
     // Background wildlife for atmosphere (not discoverable)
     for (const id of hab.ambient) {
       const ex = WE.EXTRAS[id];
-      const n = id === 'reeffish' ? 14 : id === 'gazelle' ? 5 : id === 'zebra' ? 3 : 2;
+      const n = id === 'reeffish' ? 14 : id === 'gazelle' ? 5 : id === 'zebra' ? 3 : id === 'ammonite' ? 6 : id === 'smallfish' ? 8 : 2;
       const cx = r.range(1400, WORLD_W - 600);
       for (let k = 0; k < n; k++) {
-        const ent = makeEntity(ex, ex.art, cx + r.range(-260, 260), { zoom: id === 'reeffish' ? 0.55 : 0.8, layer: E.under ? 'water' : 'ground', minH: 20 });
+        const zoom = AMBIENT_H[id] ? AMBIENT_H[id] / naturalHeight(ex.art) : id === 'reeffish' ? 0.55 : 0.8;
+        const ent = makeEntity(ex, ex.art, cx + r.range(-260, 260), { zoom, layer: E.under ? 'water' : 'ground', minH: 20 });
         ent.ambient = true;
         ent.baseY = ent.y = E.under ? r.range(200, 360) : B.GROUND + r.range(-8, 4);
         if (id === 'reeffish') { ent.school = true; ent.dir = 1; }
@@ -56,15 +62,25 @@
   // Decide where an animal lives in the scene (ground, perch, water column).
   function placeEntity(ent, r) {
     const a = ent.a;
-    if (E.under) {
+    if (a.layer === 'sky') {
+      // Soaring over the scene (Pteranodon over the seaway)
+      ent.layer = 'sky';
+      ent.baseY = ent.y = 150;
+    } else if (E.under) {
       ent.layer = 'water';
-      if (a.id === 'clownfish') { ent.baseY = B.GROUND - 30; E.decor.push({ type: 'anemone', x: ent.homeX, y: B.GROUND + 40 }); }
-      else if (a.id === 'octopus') ent.baseY = B.GROUND + 20;
-      else if (a.id === 'dolphin') ent.baseY = 260;
-      else ent.baseY = 380;
+      const depth = { clownfish: B.GROUND - 30, octopus: B.GROUND + 20, dolphin: 260, tylosaurus: 300, elasmosaurus: 360, xiphactinus: 430, archelon: 470 };
+      if (a.id === 'clownfish') E.decor.push({ type: 'anemone', x: ent.homeX, y: B.GROUND + 40 });
+      ent.baseY = depth[a.id] || 380;
       ent.y = ent.baseY;
-    } else if (a.layer === 'tree') {
-      if (E.hab.id === 'arctic') {
+    } else if (a.layer === 'water') {
+      if (a.swimmer && E.hab.id !== 'arctic') {
+        // A river pool on land (Kem Kem): the fish swims inside it
+        E.decor.push({ type: 'pool', x: ent.homeX, y: B.GROUND + 34 });
+        ent.layer = 'pool';
+        ent.baseY = ent.y = B.GROUND + 26;
+      } else ent.baseY = ent.y = B.GROUND + r.range(0, 22);
+    } else if (a.layer === 'tree' || a.layer === 'cliff') {
+      if (E.hab.id === 'arctic' || a.layer === 'cliff') {
         ent.perch = { type: 'rock', x: ent.homeX, y: B.GROUND + 6 };
         ent.baseY = ent.y = B.GROUND - 18;
       } else {
@@ -133,20 +149,21 @@
       }
     } else e.alert = Math.max(0, e.alert - dt * 0.3);
 
+    if (e.state === 'flee' && e.layer === 'pool') { e.state = 'idle'; e.gone = 5; e.alert = 0; return; }   // dives out of sight
     if (e.state === 'flee') {
       e.flee -= dt;
       e.x += e.dir * 380 * dt;
-      if (e.layer === 'tree' || e.layer === 'water') e.y = e.baseY - Math.sin((2.2 - e.flee) * 2) * 60;
+      if (e.layer === 'tree' || e.layer === 'water' || e.layer === 'cliff' || e.layer === 'sky') e.y = e.baseY - Math.sin((2.2 - e.flee) * 2) * 60;
       if (e.flee <= 0) { e.gone = 6; e.alert = 0; e.homeX = U.clamp(e.homeX + e.dir * 500, 500, WORLD_W - 300); }
       return;
     }
     e.timer -= dt;
-    const range = e.layer === 'tree' ? 0 : e.ambient ? 300 : 220;
+    const range = e.layer === 'tree' || e.layer === 'cliff' ? 0 : e.layer === 'pool' ? 90 : e.layer === 'sky' ? 420 : e.ambient ? 300 : 220;
     if (e.timer <= 0) {
       if (e.state === 'idle' && range > 0) {
         e.state = 'walk';
         e.tx = U.clamp(e.homeX + (Math.random() * 2 - 1) * range, 80, WORLD_W - 80);
-        e.ty = e.layer === 'water' ? e.baseY + (Math.random() * 2 - 1) * 70 : null;
+        e.ty = e.layer === 'water' || e.layer === 'sky' ? e.baseY + (Math.random() * 2 - 1) * 70 : null;
         e.timer = 6;
       } else {
         e.state = 'idle';
@@ -160,7 +177,7 @@
       else { e.dir = d > 0 ? 1 : -1; e.x += Math.sign(d) * Math.min(Math.abs(d), spd * dt); }
       if (e.ty !== null) e.y += (e.ty - e.y) * dt * 0.8;
     }
-    if (e.layer === 'water') e.drawY = e.y + Math.sin(E.t * 1.3 + e.offset) * 6;
+    if (e.layer === 'water' || e.layer === 'sky' || e.layer === 'pool') e.drawY = e.y + Math.sin(E.t * 1.3 + e.offset) * (e.layer === 'pool' ? 3 : 6);
     else e.drawY = e.y;
   }
 
@@ -193,11 +210,14 @@
       }
       const y = e.drawY !== undefined ? e.drawY : e.y;
       const flying = e.a.flyer && (e.state === 'flee');
-      if (!E.under && !e.perch) S.shadow(ctx, e.x, e.y, 40 * e.zoom * (e.a.sizeStat || 0.7), 0.28);
+      if (!E.under && !e.perch && e.layer !== 'sky' && e.layer !== 'pool') S.shadow(ctx, e.x, e.y, 40 * e.zoom * (e.a.sizeStat || 0.7), 0.28);
       let mode = e.state === 'flee' ? (flying ? 'fly' : 'run') : e.state === 'walk' ? 'walk' : 'idle';
+      if (e.layer === 'sky') mode = 'fly';
+      if (e.layer === 'pool') mode = 'walk';
       if (e.layer === 'water' && E.under) mode = e.state === 'idle' ? 'walk' : mode;
       S.draw(ctx, e.art, mode, E.t, e.x, y, e.zoom, e.dir, { offset: e.offset, quality: q });
       if (e.perch && e.perch.type === 'branch') drawBranchFront(ctx, e.perch);
+      if (e.layer === 'pool') { ctx.fillStyle = 'rgba(80,120,110,0.5)'; U.ellipse(ctx, e.homeX, B.GROUND + 40, 190, 16, 0); ctx.fill(); }
     }
     ctx.restore();
     B.drawLayers(ctx, [E.layers.front], E.camX, k, W);
@@ -207,6 +227,14 @@
   };
 
   function drawDecor(ctx, d) {
+    if (d.type === 'pool') {
+      const g = ctx.createLinearGradient(0, d.y - 20, 0, d.y + 20);
+      g.addColorStop(0, '#6a8a80'); g.addColorStop(1, '#3a5a52');
+      ctx.fillStyle = g; U.ellipse(ctx, d.x, d.y, 200, 26, 0); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,240,0.35)'; ctx.lineWidth = 2;
+      for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.ellipse(d.x - 60 + i * 40, d.y - 4 + i * 3, 24, 3, 0, 0, Math.PI); ctx.stroke(); }
+      return;
+    }
     if (d.type === 'anemone') B.prims.anemone(ctx, d.x, d.y, 70, U.rng(3), '#e86aa0', E.t);
     else if (d.type === 'rock') B.prims.rock(ctx, d.x, d.y, 90, 40, U.rng(5), E.hab.id === 'arctic' ? '#7a8290' : '#8a7a66');
     else if (d.type === 'branch') {

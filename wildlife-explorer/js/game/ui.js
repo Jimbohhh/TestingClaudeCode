@@ -25,18 +25,22 @@
   UI.title = function () {
     clear('.title-screen');
     const st = WE.State;
-    const found = st.foundCount();
+    const found = st.foundCount(null, 'modern'), foundPre = st.foundCount(null, 'prehistoric');
+    const go = world => { WE.Audio.init(); WE.Audio.play('open'); WE.Game.begin(world); };
     const card = el('div', { class: 'title-card' }, [
       el('div', { class: 'logo' }, [
         el('div', { class: 'eyebrow', text: 'Field Expedition Log' }),
         el('h1', { html: 'Wild<span>Dex</span>' }),
       ]),
-      el('p', { text: 'You are a wildlife explorer. Travel to six real habitats around the world, photograph animals to fill your WildDex, and unlock their creature powers for hunt and survival challenges.' }),
+      el('p', { text: 'You are a wildlife explorer. Visit real habitats around the world today, or time-travel to real fossil sites to meet dinosaurs and other prehistoric creatures. Photograph them to fill your WildDex and unlock their creature powers.' }),
       el('div', { class: 'title-actions' }, [
-        el('button', { class: 'btn', id: 'btn-start', onclick: () => { WE.Audio.init(); WE.Audio.play('open'); WE.Game.begin(); } }, [found ? 'Continue expedition' : 'Start exploring']),
-        found ? el('button', { class: 'btn ghost', id: 'btn-dex-title', onclick: () => { WE.Audio.init(); WE.Journal.open('animals'); } }, ['Open WildDex']) : null,
+        el('button', { class: 'btn', id: 'btn-start', onclick: () => go('modern') }, [found ? 'Continue: today\'s wildlife' : 'Explore today\'s wildlife']),
+        el('button', { class: 'btn amber', id: 'btn-start-pre', onclick: () => go('prehistoric') }, [foundPre ? 'Continue: prehistoric' : 'Travel back in time']),
+        found || foundPre ? el('button', { class: 'btn ghost', id: 'btn-dex-title', onclick: () => { WE.Audio.init(); WE.Journal.open('animals'); } }, ['Open WildDex']) : null,
       ]),
-      el('div', { class: 'title-foot', text: found ? `${st.rank()} · ${found} of 24 animals discovered` : 'Move: arrow keys / WASD or the on-screen stick · Sneak: Shift · Observe: E' }),
+      el('div', { class: 'title-foot', text: found || foundPre
+        ? `Today: ${found}/${WE.animalsIn('modern').length} animals · Prehistoric: ${foundPre}/${WE.animalsIn('prehistoric').length} creatures`
+        : 'Move: arrow keys / WASD or the on-screen stick · Sneak: Shift · Observe: E' }),
     ]);
     root.appendChild(el('section', { class: 'title-screen' }, [card]));
   };
@@ -53,8 +57,8 @@
       snd.querySelector('img').src = I.uiURL(WE.State.data.sound ? 'sound' : 'mute', 64);
     }, 'btn-sound');
     const hud = el('div', { class: 'hud-top hud' }, [
-      el('div', { class: 'place-chip' }, [
-        el('div', { class: 'eyebrow', text: hab.region }),
+      el('div', { class: 'place-chip' + (hab.world === 'prehistoric' ? ' pre' : '') }, [
+        el('div', { class: 'eyebrow', text: hab.world === 'prehistoric' ? `${hab.mya} million years ago · ${hab.region}` : hab.region }),
         el('div', { class: 'name', text: hab.name }),
         meter,
       ]),
@@ -132,7 +136,7 @@
     const p = WE.POWERS[a.power];
     const kids = [];
     if (res.isNew) {
-      kids.push(el('div', { class: 'eyebrow', text: `New discovery · WildDex #${String(a.num).padStart(3, '0')}` }));
+      kids.push(el('div', { class: 'eyebrow', text: a.world === 'prehistoric' ? `New prehistoric discovery · WildDex P-${String(a.num).padStart(3, '0')}` : `New discovery · WildDex #${String(a.num).padStart(3, '0')}` }));
       kids.push(el('h2', { text: a.name }));
       kids.push(el('div', { class: 'sci', text: a.sci }));
     } else {
@@ -155,9 +159,14 @@
       onClose: () => {
         if (res.unlockedHabitat) {
           WE.Audio.play('unlock');
-          UI.toast(`<b>New habitat unlocked: ${res.unlockedHabitat.name}!</b><br>Open the Map to travel there.`, 6000);
+          const u = res.unlockedHabitat;
+          UI.toast(u.world === 'prehistoric'
+            ? `<b>New time period unlocked: ${u.name}, ${u.mya} million years ago!</b><br>Open the Time Map to travel there.`
+            : `<b>New habitat unlocked: ${u.name}!</b><br>Open the Map to travel there.`, 6000);
         }
-        if (WE.State.foundCount() === 24) UI.toast('<b>WildDex complete!</b> You are a Master Naturalist.', 7000);
+        if (res.isNew && WE.State.foundCount(null, a.world) === WE.animalsIn(a.world).length) {
+          UI.toast(a.world === 'prehistoric' ? '<b>Prehistoric WildDex complete!</b> You are a Master of Deep Time.' : '<b>WildDex complete!</b> You are a Master Naturalist.', 7000);
+        }
       },
     });
     WE.Audio.play(res.isNew ? 'discover' : 'right');

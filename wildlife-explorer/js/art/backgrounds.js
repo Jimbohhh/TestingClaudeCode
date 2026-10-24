@@ -639,6 +639,11 @@
     forest: (x, r) => { for (let i = 0; i < 24; i++) { const px = r() * B.TILE; wrap(p => fern(x, p, 160, 70 + r() * 50, r, '#5a6a2a'), px, 80); } },
   };
 
+  // Exposed so add-on scene packs (prehistoric.js scenes) can register builders.
+  B.builders = builders;
+  B.fgBuilders = fgBuilders;
+  B._p = { layer, ridge, wrap };
+
   const layerCache = {};
   B.layers = function (habId) {
     if (layerCache[habId]) return layerCache[habId];
@@ -663,10 +668,14 @@
     forest: ['#6a9ac8', '#b8d2e6', '#f0d8b8'],
   };
 
+  // Era scenes borrow the sky/atmosphere behaviour of a similar modern habitat.
+  B.LOOK = {};
+  B.extraAtmo = {};
   B.drawSky = function (ctx, habId, w, h, t, camX) {
+    const look = B.LOOK[habId] || habId;
     const s = B.SKIES[habId];
     const g = ctx.createLinearGradient(0, 0, 0, h);
-    if (habId === 'reef') {
+    if (look === 'reef') {
       g.addColorStop(0, s[2]); g.addColorStop(0.5, s[1]); g.addColorStop(1, s[0]);
     } else {
       g.addColorStop(0, s[0]); g.addColorStop(0.6, s[1]); g.addColorStop(1, s[2]);
@@ -674,13 +683,13 @@
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
     const k = h / B.SCENE_H;
-    if (habId === 'savanna' || habId === 'desert') {
-      const sx = w * 0.72 - camX * 0.01, sy = h * (habId === 'savanna' ? 0.33 : 0.16);
+    if (look === 'savanna' || look === 'desert') {
+      const sx = w * 0.72 - camX * 0.01, sy = h * (look === 'savanna' ? 0.33 : 0.16);
       const sg = ctx.createRadialGradient(sx, sy, 0, sx, sy, 160 * k);
       sg.addColorStop(0, 'rgba(255,250,225,1)'); sg.addColorStop(0.15, 'rgba(255,236,170,0.9)'); sg.addColorStop(1, 'rgba(255,220,150,0)');
       ctx.fillStyle = sg; ctx.fillRect(sx - 160 * k, sy - 160 * k, 320 * k, 320 * k);
     }
-    if (habId === 'arctic') {
+    if (look === 'arctic') {
       // Aurora borealis: curtains of light made of many vertical rays
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
@@ -704,7 +713,7 @@
       for (let i = 0; i < 90; i++) { ctx.globalAlpha = 0.3 + 0.7 * Math.abs(Math.sin(t * 0.7 + i)); ctx.fillRect(r() * w, r() * h * 0.4, 1.5, 1.5); }
       ctx.globalAlpha = 1;
     }
-    if (habId !== 'reef' && habId !== 'rainforest' && habId !== 'arctic') {
+    if (look !== 'reef' && look !== 'rainforest' && look !== 'arctic') {
       // Drifting clouds
       const r = U.rng(habId + 'cl');
       for (let i = 0; i < 6; i++) {
@@ -718,15 +727,17 @@
 
   // Light shafts, caustics, snow, heat shimmer — drawn over the scene.
   B.drawAtmosphere = function (ctx, habId, w, h, t, camX) {
+    const look = B.LOOK[habId] || habId;
     const k = h / B.SCENE_H;
-    if (habId === 'reef' || habId === 'rainforest') {
+    if (B.extraAtmo[habId]) B.extraAtmo[habId](ctx, w, h, t, camX);
+    if (look === 'reef' || look === 'rainforest') {
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       for (let i = 0; i < 6; i++) {
         const x0 = ((i * 330 - camX * 0.2) % (w + 600) + w + 600) % (w + 600) - 300;
         const sway = Math.sin(t * 0.3 + i) * 40 * k;
         const g = ctx.createLinearGradient(x0, 0, x0 + 200 * k, h);
-        const a = habId === 'reef' ? 0.09 : 0.07;
+        const a = look === 'reef' ? 0.09 : 0.07;
         g.addColorStop(0, `rgba(255,255,230,${a + 0.03 * Math.sin(t + i)})`); g.addColorStop(1, 'rgba(255,255,230,0)');
         ctx.fillStyle = g;
         ctx.beginPath();
@@ -735,7 +746,7 @@
       }
       ctx.restore();
     }
-    if (habId === 'reef') {
+    if (look === 'reef') {
       // floating particles & bubbles
       const r = U.rng(77);
       for (let i = 0; i < 60; i++) {
@@ -747,7 +758,7 @@
       // depth tint
       ctx.fillStyle = 'rgba(10,60,110,0.12)'; ctx.fillRect(0, 0, w, h);
     }
-    if (habId === 'arctic') {
+    if (look === 'arctic') {
       const r = U.rng(88);
       ctx.fillStyle = 'rgba(255,255,255,0.85)';
       for (let i = 0; i < 120; i++) {
@@ -757,14 +768,14 @@
         U.ellipse(ctx, px, py, 1 + r() * 1.8, 1 + r() * 1.8, 0); ctx.fill();
       }
     }
-    if (habId === 'rainforest') {
+    if (look === 'rainforest') {
       ctx.fillStyle = 'rgba(200,230,210,0.08)';
       ctx.fillRect(0, h * 0.55, w, h * 0.45);
     }
-    if (habId === 'forest') {
+    if (look === 'forest') {
       // falling autumn leaves
       const r = U.rng(99);
-      const cols = ['#e67e22', '#c0392b', '#f1c40f'];
+      const cols = (B.LEAF_COLORS && B.LEAF_COLORS[habId]) || ['#e67e22', '#c0392b', '#f1c40f'];
       for (let i = 0; i < 18; i++) {
         const px = ((r() * w * 2 - camX * 0.9 + Math.sin(t * 0.8 + i) * 40) % w + w) % w;
         const py = (r() * h + t * (25 + r() * 20)) % h;
@@ -814,21 +825,22 @@
       x.fillStyle = U.rgba(r() < 0.5 ? U.shade(st.base[0], 0.12) : U.shade(st.base[1], -0.12), 0.25);
       U.ellipse(x, r() * W, r() * H, 10 + r() * 40, 6 + r() * 25, r() * 3); x.fill();
     }
-    // texture details
-    if (styleId === 'savanna') {
+    // texture details (era styles reuse a modern 'look')
+    const look = st.look || styleId;
+    if (look === 'savanna') {
       for (let i = 0; i < W * H / 300; i++) { x.strokeStyle = U.rgba(r() < 0.5 ? '#e2c27a' : '#8a6a2a', 0.5); x.lineWidth = 1; const px = r() * W, py = r() * H; x.beginPath(); x.moveTo(px, py); x.lineTo(px + (r() - 0.5) * 6, py - 4 - r() * 4); x.stroke(); }
-    } else if (styleId === 'rainforest' || styleId === 'forest') {
-      const cols = styleId === 'forest' ? ['#c0392b', '#e67e22', '#f1c40f', '#8a5a2a'] : ['#6a4a24', '#8a6a34', '#4a5a2a'];
+    } else if (look === 'rainforest' || look === 'forest') {
+      const cols = st.leaves || (look === 'forest' ? ['#c0392b', '#e67e22', '#f1c40f', '#8a5a2a'] : ['#6a4a24', '#8a6a34', '#4a5a2a']);
       for (let i = 0; i < W * H / 120; i++) { x.fillStyle = U.rgba(r.pick(cols), 0.6); U.ellipse(x, r() * W, r() * H, 3 + r() * 3, 1.5 + r() * 2, r() * 3); x.fill(); }
-    } else if (styleId === 'desert') {
+    } else if (look === 'desert') {
       x.strokeStyle = 'rgba(150,90,40,0.25)';
       for (let yy = 0; yy < H; yy += 14) { x.beginPath(); for (let xx = 0; xx <= W; xx += 20) x.lineTo(xx, yy + Math.sin(xx * 0.02 + yy * 0.1) * 5); x.stroke(); }
-    } else if (styleId === 'arctic') {
+    } else if (look === 'arctic') {
       x.strokeStyle = 'rgba(140,180,210,0.35)';
       for (let i = 0; i < 200; i++) { const px = r() * W, py = r() * H; x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px + 30, py + 5, px + 60 + r() * 40, py - 4); x.stroke(); }
-    } else if (styleId === 'reef') {
+    } else if (look === 'reef' || look === 'seafloor') {
       for (let i = 0; i < W * H / 400; i++) { x.fillStyle = 'rgba(255,255,255,0.25)'; U.ellipse(x, r() * W, r() * H, 1 + r() * 2, 1 + r(), 0); x.fill(); }
-    } else if (styleId === 'arcticwater' || styleId === 'lake') {
+    } else if (look === 'arcticwater' || look === 'lake') {
       x.strokeStyle = 'rgba(255,255,255,0.12)'; x.lineWidth = 2;
       for (let i = 0; i < 300; i++) { const px = r() * W, py = r() * H; x.beginPath(); x.arc(px, py, 10 + r() * 30, 0.2, 1.2); x.stroke(); }
     }
@@ -843,11 +855,11 @@
     const decor = [];
     const nDec = Math.floor(W * H / 90000);
     for (let i = 0; i < nDec; i++) decor.push({ x: r() * W, y: r() * H, s: 0.7 + r() * 0.8, k: r() });
-    for (const d of decor) drawDecorTop(x, styleId, d, r);
+    for (const d of decor) drawDecorTop(x, look, d, r);
     // Cover lives on its own layer so it can also be drawn over hidden animals.
     const cc = U.canvas(W, H);
     const cx2 = cc.getContext('2d');
-    for (const cv of covers) drawCoverTop(cx2, styleId, st, cv, r);
+    for (const cv of covers) drawCoverTop(cx2, look, st, cv, r);
     return { canvas: c, coverCanvas: cc, covers, style: st, styleId };
   };
 
@@ -885,6 +897,14 @@
     } else if (styleId === 'arctic') {
       if (d.k < 0.4) { x.fillStyle = '#6b7280'; U.ellipse(x, 0, 0, 20 * s, 14 * s, 0.3); x.fill(); x.fillStyle = '#ffffff'; U.ellipse(x, -3, -5, 16 * s, 8 * s, 0.3); x.fill(); }
       else { x.fillStyle = 'rgba(160,200,230,0.5)'; U.ellipse(x, 0, 0, 45 * s, 25 * s, d.k * 3); x.fill(); x.strokeStyle = 'rgba(255,255,255,0.7)'; x.beginPath(); x.moveTo(-30 * s, -5); x.lineTo(20 * s, 6); x.stroke(); }
+    } else if (styleId === 'seafloor') {
+      if (d.k < 0.5) {
+        // ammonite shell lying on the chalky sea floor
+        x.fillStyle = '#c8a878'; U.ellipse(x, 0, 0, 14 * s, 14 * s, 0); x.fill();
+        x.strokeStyle = '#8a6a48'; x.lineWidth = 1.2; x.beginPath();
+        for (let t = 0; t < 14; t += 0.2) { const rr = 14 * s * Math.exp(-t * 0.16); t ? x.lineTo(Math.cos(t) * rr, Math.sin(t) * rr) : x.moveTo(Math.cos(t) * rr, Math.sin(t) * rr); }
+        x.stroke();
+      } else { x.fillStyle = '#b8b098'; U.ellipse(x, 0, 0, 30 * s, 18 * s, d.k * 3); x.fill(); x.strokeStyle = 'rgba(90,80,60,0.4)'; for (let k = 1; k < 5; k++) { x.beginPath(); x.ellipse(0, 0, 7 * k * s, 4 * k * s, d.k * 3, 0, U.TAU); x.stroke(); } }
     } else if (styleId === 'arcticwater') {
       x.fillStyle = 'rgba(255,255,255,0.08)'; U.ellipse(x, 0, 0, 30 * s, 12 * s, 0); x.fill();
     } else if (styleId === 'lake') {
@@ -922,6 +942,19 @@
           x.rotate(U.TAU / 6 + r() * 0.2);
           x.fillStyle = U.shade(col, (r() - 0.5) * 0.25);
           U.ellipse(x, cv.r * 0.25, 0, cv.r * 0.25, cv.r * 0.07, 0); x.fill();
+        }
+        x.restore();
+      }
+    } else if (styleId === 'seafloor') {
+      // sea lilies (crinoids) and sponges seen from above
+      for (let i = 0; i < 8; i++) {
+        const a = r() * U.TAU, d = Math.sqrt(r()) * cv.r * 0.75;
+        x.save(); x.translate(Math.cos(a) * d, Math.sin(a) * d * 0.8);
+        if (i % 3 === 0) { x.fillStyle = r() < 0.5 ? '#c89a5a' : '#a8865a'; U.ellipse(x, 0, 0, 14, 12, 0); x.fill(); x.fillStyle = 'rgba(0,0,0,0.3)'; U.ellipse(x, 0, 0, 6, 5, 0); x.fill(); }
+        else {
+          const col = r() < 0.5 ? '#c86a8a' : '#d8a060';
+          x.strokeStyle = col; x.lineCap = 'round'; x.lineWidth = 3;
+          for (let k = 0; k < 10; k++) { const aa = k / 10 * U.TAU; x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(Math.cos(aa + 0.3) * 14, Math.sin(aa + 0.3) * 14, Math.cos(aa) * 24, Math.sin(aa) * 24); x.stroke(); }
         }
         x.restore();
       }

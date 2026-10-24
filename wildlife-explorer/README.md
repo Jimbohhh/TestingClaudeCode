@@ -1,6 +1,6 @@
 # WildDex Explorer
 
-An educational wildlife exploration game for the browser. You play a field explorer travelling to six real habitats around the world. You photograph animals to fill your **WildDex**, a digital field journal (like a Pokédex), and unlock **creature powers**. Then you play as those animals in hunt and survival minigames.
+An educational wildlife exploration game for the browser. You play a field explorer travelling to six real habitats around the world, **or time-travelling to eight real fossil sites** to meet dinosaurs and other prehistoric creatures. You photograph animals to fill your **WildDex**, a digital field journal (like a Pokédex) with a *Today* book and a *Prehistoric* book. Each discovery unlocks a **creature power**, and then you can play as that animal in hunt and survival minigames.
 
 All art is drawn in code: shaded animal sprites with fur, scale and feather texture, coat patterns, walk cycles and painted parallax scenery. There are no emoji and no image files.
 
@@ -39,6 +39,23 @@ Open `index.html` in any modern browser (double-clicking it works, no server nee
 
 Each of the 24 animals unlocks one of 24 creature powers based on its real biology. Examples: Cheetah Sprint, Mighty Roar, Echolocation, Ink Cloud, Winter Camouflage, Toxic Skin, Pack Howl, Sand Ambush and Eagle Eye.
 
+## Prehistoric expedition
+
+Choose **Travel back in time** on the title screen, or use the Time portal on the WildDex map. A time tunnel counts down the millions of years. The **Time Map** shows each era on a timeline (Triassic, Jurassic, Cretaceous) and where its fossils are found today. Scenery uses plants from each era: ferns, horsetails, cycads, ginkgos, tree ferns, monkey-puzzle conifers, seed ferns, and, in the Cretaceous, palms and early flowering plants. There is no grass, fruit trees or berry bushes, because those came later.
+
+| Era (real fossil site) | When | Creatures |
+| --- | --- | --- |
+| Valley of the Moon, Ischigualasto, Argentina | 231 million years ago (Late Triassic) | Herrerasaurus, Eoraptor, Saurosuchus, Hyperodapedon, Ischigualastia |
+| Morrison Formation, Colorado/Utah/Wyoming | 150 mya (Late Jurassic) | Allosaurus, Stegosaurus, Brachiosaurus, Diplodocus, Ceratosaurus |
+| Solnhofen Lagoon, Bavaria, Germany | 150 mya (Late Jurassic) | Archaeopteryx, Compsognathus, Rhamphorhynchus, Pterodactylus |
+| Yixian Formation, Liaoning, China | 125 mya (Early Cretaceous) | Yutyrannus, Microraptor, Psittacosaurus, Sinosauropteryx, Confuciusornis |
+| Kem Kem Beds, Morocco | 95 mya (mid-Cretaceous) | Spinosaurus, Carcharodontosaurus, Deltadromeus, Onchopristis, Alanqa |
+| Western Interior Seaway, Kansas | 85 mya (Late Cretaceous) | Tylosaurus, Elasmosaurus, Pteranodon, Xiphactinus, Archelon |
+| Flaming Cliffs, Gobi Desert, Mongolia | 75 mya (Late Cretaceous) | Velociraptor, Protoceratops, Citipati, Pinacosaurus, Shuvuuia |
+| Hell Creek, Montana | 66 mya (Late Cretaceous) | Tyrannosaurus rex, Triceratops, Edmontosaurus, Ankylosaurus, Pachycephalosaurus, Dakotaraptor |
+
+That's 40 prehistoric creatures, each with facts, a quiz and its own creature power. Hell Creek is open from the start, and each era unlocks the next after 2 discoveries. Entries say clearly which creatures are not dinosaurs (pterosaurs, marine reptiles, early mammal relatives and so on). Most size and speed figures for extinct animals are estimates.
+
 ## Project layout
 
 ```
@@ -48,6 +65,9 @@ css/style.css         UI styling (handheld field-device look)
 js/util.js            math, seeded random, colour and canvas helpers
 js/data/animals.js    species facts, quizzes, powers and sprite specs
 js/data/habitats.js   habitats and creature-power definitions
+js/data/prehistoric.js eras, prehistoric creatures, powers and minigame stats
+js/art/dinos.js       dinosaur, pterosaur, marine-reptile and ammonite renderers, prehistoric plants
+js/art/prehistoric-scenes.js  era scenery (parallax and top-down arena looks)
 js/art/sprites.js     procedural sprite engine (quadrupeds, birds, fish, cetaceans, seals, snakes, frog, turtle, octopus, critters, food, explorer)
 js/art/backgrounds.js parallax habitat scenery and top-down arena ground
 js/art/worldmap.js    world map (lon/lat outlines, equirectangular projection)

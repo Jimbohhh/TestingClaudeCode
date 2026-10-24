@@ -8,8 +8,10 @@
     photos: {},            // id -> jpeg data URL taken in the field
     quiz: {},              // id -> true when answered correctly
     stars: {},             // id -> best stars in minigame (0-3)
-    unlocked: ['savanna'],
+    unlocked: ['savanna', 'hellcreek'],
     habitat: 'savanna',
+    lastModern: 'savanna',
+    lastEra: 'hellcreek',
     loadout: [],
     xp: 0,
     sound: true,
@@ -22,6 +24,8 @@
       try {
         const raw = localStorage.getItem(KEY);
         if (raw) this.data = Object.assign(fresh(), JSON.parse(raw));
+        // Saves from before the prehistoric expedition existed: open its first era.
+        if (!this.data.unlocked.includes('hellcreek')) this.data.unlocked.push('hellcreek');
       } catch (e) { /* storage unavailable: play without saving */ }
       return this.data;
     },
@@ -35,8 +39,8 @@
     reset() { this.data = fresh(); this.save(); },
 
     isFound(id) { return !!this.data.discovered[id]; },
-    foundCount(habId) {
-      return WE.ANIMALS.filter(a => (!habId || a.habitat === habId) && this.isFound(a.id)).length;
+    foundCount(habId, world) {
+      return WE.ANIMALS.filter(a => (!habId || a.habitat === habId) && (!world || a.world === world) && this.isFound(a.id)).length;
     },
     hasPower(pid) {
       const p = WE.POWERS[pid];
@@ -69,13 +73,14 @@
       const have = this.foundCount(prev.id);
       return { prev, need: DISCOVERIES_TO_UNLOCK, have: Math.min(have, DISCOVERIES_TO_UNLOCK) };
     },
-    rank() {
-      const n = this.foundCount();
-      if (n >= 24) return 'Master Naturalist';
-      if (n >= 16) return 'Senior Field Biologist';
-      if (n >= 10) return 'Field Biologist';
-      if (n >= 4) return 'Junior Ranger';
-      return 'Rookie Explorer';
+    rank(world) {
+      world = world || 'modern';
+      const total = WE.animalsIn(world).length;
+      const f = this.foundCount(null, world) / total;
+      const names = world === 'prehistoric'
+        ? ['Fossil Hunter', 'Junior Paleontologist', 'Paleontologist', 'Senior Paleontologist', 'Master of Deep Time']
+        : ['Rookie Explorer', 'Junior Ranger', 'Field Biologist', 'Senior Field Biologist', 'Master Naturalist'];
+      return names[f >= 1 ? 4 : f >= 0.66 ? 3 : f >= 0.4 ? 2 : f >= 0.15 ? 1 : 0];
     },
   };
   State.DISCOVERIES_TO_UNLOCK = DISCOVERIES_TO_UNLOCK;

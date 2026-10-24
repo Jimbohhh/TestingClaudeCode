@@ -92,7 +92,7 @@
     const fr = frameRect(W, H);
     const z = O.zoomFor(H);
     const f = S.frame(O.a.art, 'idle', 0, 1);
-    const grounded = !O.a.flyer && !(O.a.swimmer && O.hab.underwater);
+    const grounded = !O.a.flyer && !(O.a.swimmer && (O.hab.underwater || O.ent.layer === 'pool'));
     const gx = fr.x + O.pos.x * fr.w;
     const gy = grounded ? H * 0.86 + (O.pos.y - 0.5) * H * 0.08 : fr.y + O.pos.y * fr.h + f.oy * z * 0.5;
     return { gx, gy, x: gx, y: gy - f.oy * z * 0.5, r: Math.max(52, Math.min(f.w, f.h) * z * 0.45), z, grounded };
@@ -106,7 +106,10 @@
     // Crop a photo around the animal from the clean scene layer.
     const c = O.animalCenter(W, H);
     const pw = 360, ph = 240;
-    const sw = Math.min(O.scene.width, c.r * 4.2 * WE.Game.dpr), sh = sw * ph / pw;
+    // Frame the whole animal (plus a little habitat around it).
+    const f = S.frame(O.a.art, 'idle', 0, 1);
+    const need = Math.max(f.w * c.z * 1.2, f.h * c.z * 1.2 * pw / ph, c.r * 3);
+    const sw = Math.min(O.scene.width, O.scene.height * pw / ph, need * WE.Game.dpr), sh = sw * ph / pw;
     const sx = U.clamp(c.x * WE.Game.dpr - sw / 2, 0, O.scene.width - sw);
     const sy = U.clamp(c.y * WE.Game.dpr - sh / 2, 0, O.scene.height - sh);
     const pc = U.canvas(pw, ph);
@@ -136,6 +139,7 @@
     const moving = O.pause <= 0;
     let mode = moving ? (O.a.flyer ? 'fly' : 'walk') : 'idle';
     if (O.a.swimmer) mode = 'walk';
+    if (O.a.layer === 'sky') mode = 'fly';
     if (c.grounded) S.shadow(sc, c.gx, c.gy, 70 * c.z * 0.6, 0.35);
     S.draw(sc, O.a.art, mode, O.t, c.gx, c.gy, c.z, O.dir, { quality: Math.min(3, Math.ceil(c.z * dpr)) });
     B.drawAtmosphere(sc, O.hab.id, W, H, O.t, O.camX);

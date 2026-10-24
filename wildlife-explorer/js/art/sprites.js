@@ -2148,6 +2148,7 @@
     arctic: { shirt: '#c0392b', pants: '#2c3e50', boots: '#3d2b1f', skin: '#c68c5a', hair: '#3b2416', pack: '#34495e', hood: '#a93226', fur: '#efe9df', gloves: '#2c3e50' },
     diver: { shirt: '#1f2a36', pants: '#1f2a36', boots: '#f2c94c', skin: '#c68c5a', hair: '#3b2416', pack: '#c0c6cc', gloves: '#1f2a36', belt: '#f2c94c' },
     desert: { shirt: '#e3d3b0', pants: '#a58a5c', boots: '#6b4a2b', skin: '#c68c5a', hair: '#3b2416', pack: '#8d6e45', hat: 'safari', hatColor: '#f1e4c4', collar: '#cdbb94', sleeveSkin: true },
+    paleo: { shirt: '#3f7f86', pants: '#8a7550', boots: '#4a3322', skin: '#c68c5a', hair: '#3b2416', pack: '#b8662a', hat: 'safari', hatColor: '#c9b48a', collar: '#e0a040', sleeveSkin: true },
     jungle: { shirt: '#6e7f4a', pants: '#4d5a36', boots: '#3a2a1c', skin: '#c68c5a', hair: '#3b2416', pack: '#a0652e', hat: 'safari', hatColor: '#9a8a5a', collar: '#5b6a3c', sleeveSkin: true },
   };
 
@@ -2159,6 +2160,10 @@
     seal: S.renderSeal, snake: S.renderSnake, frog: S.renderFrog, turtle: S.renderTurtle,
     octopus: S.renderOctopus, rodent: S.renderRodent, bug: S.renderBug, food: S.renderFood,
   };
+
+  // Shared internals so add-on renderers (dinos.js) can reuse the pipeline.
+  S.RENDERERS = RENDERERS;
+  S._h = { makeLayer, finishSurface, drawEye, drawPattern };
 
   const cache = new Map();
   S.FRAMES = 12;

@@ -374,3 +374,45 @@ button.chip { text-decoration: underline; text-decoration-color: rgba(0,0,0,0.25
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
+
+/* ---------- Prehistoric expedition ---------- */
+.dex-wrap.prehistoric .dex { background: linear-gradient(160deg, #6a4a2a, #4a3220 40%, #2a1c12); }
+.dex-wrap.prehistoric .dex-led { background: radial-gradient(circle at 35% 35%, #fff0b0, #f2b630 45%, #b87a10); box-shadow: 0 0 12px #f2b630; }
+.tag-pre { font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; background: #f2b630; color: #2a1c12; padding: 1px 6px; border-radius: 5px; vertical-align: middle; }
+.book-switch { display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: rgba(0,0,0,0.3); margin-left: auto; flex: none; }
+.book-btn { padding: 5px 12px; border-radius: 999px; font-weight: 800; font-size: 13px; color: var(--on-dark-soft); }
+.book-btn[aria-pressed="true"] { background: var(--signal); color: #2a1406; }
+.dex-wrap.prehistoric .book-btn[aria-pressed="true"] { background: #f2b630; }
+.dex-head .dex-tabs { margin-left: 0; }
+.extinct-pill { display: inline-block; font-family: var(--font-mono); font-size: 12px; padding: 2px 8px; border-radius: 5px; background: #6a5a48; color: #fff; letter-spacing: 0.08em; }
+.timeline { position: relative; height: 190px; margin: 4px 6px 0; }
+.tl-period { position: absolute; top: 136px; height: 16px; display: flex; justify-content: center; }
+.tl-period span { position: absolute; top: 19px; font-size: 12px; font-weight: 800; color: var(--ink-soft); white-space: nowrap; }
+.tl-era { position: absolute; top: calc(108px - var(--lane) * 30px); transform: translateX(-50%); display: flex; align-items: center; gap: 6px; padding: 3px 9px 3px 4px; border-radius: 999px; background: #f3efdd; box-shadow: 0 1px 0 #c9c1a2, 0 3px 8px rgba(0,0,0,0.12); font-family: var(--font-display); font-weight: 700; font-size: 13px; white-space: nowrap; color: var(--ink); }
+.tl-era::after { content: ""; position: absolute; left: 50%; top: 100%; width: 2px; height: calc(var(--lane) * 30px + 4px); background: rgba(28,42,35,0.35); }
+.tl-era i { width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6); }
+.tl-era.locked { opacity: 0.55; }
+.tl-era.here { box-shadow: 0 0 0 3px var(--signal); }
+.tl-axis { position: absolute; top: 176px; left: 0; right: 0; display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); }
+.map-caption { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 6px; }
+.portal { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 14px 16px; border-radius: var(--r-md); background: linear-gradient(120deg, #4a3220, #8a5a2a 55%, #c88a3a); color: #fff4dc; }
+.portal.back { background: linear-gradient(120deg, #1d3a2f, #2c6a5a 55%, #3a8a7a); }
+.portal-t { font-family: var(--font-display); font-weight: 800; font-size: 20px; }
+.portal-d { font-size: 14px; line-height: 1.4; max-width: 52ch; }
+.title-actions .btn.amber { background: #f2b630; color: #2a1c12; box-shadow: 0 3px 0 #b87a10, 0 6px 14px rgba(0,0,0,0.25); }
+.place-chip.pre { box-shadow: inset 0 0 0 1px rgba(242,182,48,0.5); }
+.place-chip.pre .eyebrow { color: #f2c860; }
+@media (max-width: 760px) {
+  .book-switch { margin-left: 0; order: 3; }
+  .tl-era span { font-size: 11px; }
+}
+@media (max-width: 560px) {
+  .timeline { height: 200px; }
+  .tl-era { top: calc(112px - var(--lane) * 28px); }
+  .tl-period { top: 146px; }
+  .tl-axis { top: 186px; }
+  .tl-period span { display: none; }
+  .tl-era { padding: 4px; }
+  .tl-era span { display: none; }
+  .map-pin .tag { display: none; }
+}
